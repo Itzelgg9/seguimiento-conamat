@@ -1,0 +1,491 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Seguimiento del alumno · CONAMAT Hidalgo – San Cosme</title>
+<meta name="description" content="Cuéntanos si te gustaría que la persona encargada del grupo te llame para platicar sobre el desempeño del alumno.">
+<meta name="theme-color" content="#354F8B">
+<meta property="og:title" content="Seguimiento del alumno · CONAMAT Hidalgo – San Cosme">
+<meta property="og:description" content="Formulario para mamás, papás y tutores de los cursos UNAM, UAM, IPN y COLBACH.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:opsz,wght@6..12,400;6..12,600;6..12,700;6..12,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --azul: #354F8B;
+    --azul-osc: #263b6c;
+    --azul-claro: #eef2fa;
+    --rojo: #CE3129;
+    --texto: #1d2433;
+    --suave: #5b6476;
+    --borde: #d6dce8;
+    --fondo: #f4f6fb;
+    --tarjeta: #ffffff;
+    --ok: #1f8a4c;
+    --radio: 14px;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body {
+    margin: 0;
+    font-family: "Nunito Sans", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    color: var(--texto);
+    background: var(--fondo);
+    line-height: 1.5;
+    font-size: 17px;
+  }
+  .franja {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-osc) 100%);
+    padding: 28px 16px 84px;
+    text-align: center;
+  }
+  .franja img { width: min(300px, 78vw); height: auto; display: block; margin: 0 auto; }
+  main { max-width: 640px; margin: -60px auto 0; padding: 0 16px 40px; }
+  .tarjeta {
+    background: var(--tarjeta);
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(38, 59, 108, .12);
+    padding: 28px 22px;
+  }
+  @media (min-width: 560px) { .tarjeta { padding: 36px 36px; } }
+  h1 { margin: 0 0 8px; font-size: 30px; color: var(--azul); font-weight: 800; letter-spacing: -.01em; }
+  .intro { margin: 0 0 8px; color: var(--suave); }
+  .seccion { border-top: 1px solid var(--borde); margin-top: 26px; padding-top: 22px; }
+  .seccion h2 { margin: 0 0 14px; font-size: 19px; font-weight: 800; line-height: 1.35; }
+  .paso { display: inline-block; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--rojo); margin-bottom: 4px; }
+  label.campo { display: block; font-weight: 700; margin: 14px 0 6px; font-size: 15px; }
+  .opcional { font-weight: 400; color: var(--suave); }
+  input[type=text], input[type=tel], textarea {
+    width: 100%;
+    font: inherit;
+    padding: 13px 14px;
+    border: 1.5px solid var(--borde);
+    border-radius: 12px;
+    background: #fff;
+    color: var(--texto);
+    transition: border-color .15s, box-shadow .15s;
+  }
+  input:focus, textarea:focus { outline: none; border-color: var(--azul); box-shadow: 0 0 0 4px rgba(53, 79, 139, .15); }
+  .fila { display: grid; grid-template-columns: 1fr; gap: 0 14px; }
+  @media (min-width: 560px) { .fila { grid-template-columns: 2fr 1fr; } }
+
+  /* Opciones tipo botón */
+  .opciones { display: flex; flex-wrap: wrap; gap: 10px; }
+  .opciones input { position: absolute; opacity: 0; pointer-events: none; }
+  .opciones label {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px;
+    border: 1.5px solid var(--borde);
+    border-radius: 999px;
+    background: #fff;
+    font-weight: 700;
+    cursor: pointer;
+    user-select: none;
+    transition: all .15s;
+    font-size: 16px;
+  }
+  .opciones label:hover { border-color: var(--azul); }
+  .opciones input:checked + label { background: var(--azul); border-color: var(--azul); color: #fff; }
+  .opciones input:focus-visible + label { box-shadow: 0 0 0 4px rgba(53, 79, 139, .25); }
+
+  /* Sí / No grandes */
+  .decision { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .decision input { position: absolute; opacity: 0; pointer-events: none; }
+  .decision label {
+    display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;
+    padding: 18px 10px;
+    border: 2px solid var(--borde);
+    border-radius: var(--radio);
+    cursor: pointer;
+    text-align: center;
+    background: #fff;
+    transition: all .15s;
+  }
+  .decision .grande { font-size: 24px; font-weight: 800; }
+  .decision .chica { font-size: 13.5px; color: var(--suave); line-height: 1.3; }
+  .decision label:hover { border-color: var(--azul); }
+  .decision input:checked + label { border-color: var(--azul); background: var(--azul-claro); box-shadow: inset 0 0 0 1px var(--azul); }
+  .decision input:checked + label .grande { color: var(--azul); }
+  .decision input:focus-visible + label { box-shadow: 0 0 0 4px rgba(53, 79, 139, .25); }
+
+  .bloque-si { overflow: hidden; }
+  .oculto { display: none !important; }
+  .ayuda { font-size: 14px; color: var(--suave); margin: 6px 0 0; }
+  .error { color: var(--rojo); font-size: 14px; font-weight: 700; margin: 6px 0 0; }
+  .invalido { border-color: var(--rojo) !important; }
+  .grupo-invalido label { border-color: #e9a29e; }
+
+  .privacidad {
+    display: flex; gap: 10px; align-items: flex-start;
+    font-size: 14px; color: var(--suave);
+    background: var(--fondo);
+    border-radius: 12px; padding: 14px;
+    margin-top: 26px;
+  }
+  .privacidad input { width: 20px; height: 20px; margin: 1px 0 0; accent-color: var(--azul); flex: none; }
+
+  button.enviar {
+    width: 100%;
+    margin-top: 20px;
+    padding: 16px;
+    font: inherit; font-weight: 800; font-size: 18px;
+    color: #fff;
+    background: var(--rojo);
+    border: 0; border-radius: 14px;
+    cursor: pointer;
+    box-shadow: 0 6px 16px rgba(206, 49, 41, .28);
+    transition: transform .1s, filter .15s;
+  }
+  button.enviar:hover { filter: brightness(1.05); }
+  button.enviar:active { transform: translateY(1px); }
+  button.enviar[disabled] { filter: grayscale(.4) brightness(1.1); cursor: wait; }
+  .aviso-envio { margin: 12px 0 0; font-weight: 700; color: var(--rojo); text-align: center; }
+
+  .frase { text-align: center; color: var(--azul); font-style: italic; font-weight: 700; margin: 28px 8px 0; }
+  footer { text-align: center; font-size: 13px; color: var(--suave); margin-top: 26px; }
+  footer a { color: var(--azul); }
+
+  /* Pantalla de gracias */
+  .gracias { text-align: center; padding: 10px 0; }
+  .gracias .palomita {
+    width: 76px; height: 76px; border-radius: 50%;
+    background: #e6f4ec; color: var(--ok);
+    display: grid; place-items: center;
+    margin: 0 auto 16px;
+  }
+  .gracias h1 { margin-bottom: 10px; }
+  .gracias p { color: var(--suave); margin: 0 0 8px; }
+  .resumen { text-align: left; background: var(--fondo); border-radius: 12px; padding: 14px 16px; margin: 18px 0 0; font-size: 15px; }
+  .resumen div { padding: 3px 0; }
+  .resumen b { color: var(--texto); }
+  .enlace { background: none; border: 0; color: var(--azul); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; margin-top: 18px; }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+</style>
+</head>
+<body>
+<header class="franja">
+  <img src="logo-conamat-blanco.png" alt="CONAMAT Colegio Nacional de Matemáticas · Plantel Hidalgo – San Cosme" width="640" height="128">
+</header>
+
+<main>
+  <div class="tarjeta" id="tarjeta">
+    <form id="formulario" novalidate>
+      <h1>¡Hola!</h1>
+      <p class="intro">En CONAMAT acompañamos de cerca a cada grupo para estar al pendiente de cómo van nuestros alumnos, tanto en sus clases como en lo personal. Para lograrlo, nos gusta mantenernos en contacto con ustedes.</p>
+      <p class="intro">Responder te toma menos de un minuto.</p>
+
+      <!-- 1. Alumno -->
+      <section class="seccion">
+        <span class="paso">Paso 1</span>
+        <h2>Datos del alumno</h2>
+
+        <label class="campo" id="lbl-curso">Curso</label>
+        <div class="opciones" role="radiogroup" aria-labelledby="lbl-curso" data-grupo="curso">
+          <input type="radio" name="curso" id="c-unam" value="UNAM"><label for="c-unam">UNAM</label>
+          <input type="radio" name="curso" id="c-uam" value="UAM"><label for="c-uam">UAM</label>
+          <input type="radio" name="curso" id="c-ipn" value="IPN"><label for="c-ipn">IPN</label>
+          <input type="radio" name="curso" id="c-colbach" value="COLBACH"><label for="c-colbach">COLBACH</label>
+        </div>
+
+        <label class="campo" id="lbl-plantel">Plantel</label>
+        <div class="opciones" role="radiogroup" aria-labelledby="lbl-plantel" data-grupo="plantel">
+          <input type="radio" name="plantel" id="p-hidalgo" value="Hidalgo"><label for="p-hidalgo">Hidalgo</label>
+          <input type="radio" name="plantel" id="p-sancosme" value="San Cosme"><label for="p-sancosme">San Cosme</label>
+        </div>
+
+        <div class="fila">
+          <div>
+            <label class="campo" for="alumno">Nombre completo del alumno</label>
+            <input type="text" id="alumno" name="alumno" autocomplete="off" maxlength="120" placeholder="Nombre y apellidos">
+          </div>
+          <div>
+            <label class="campo" for="grupo">Grupo</label>
+            <input type="text" id="grupo" name="grupo" autocomplete="off" maxlength="30" placeholder="Ej. 1">
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. Seguimiento -->
+      <section class="seccion">
+        <span class="paso">Paso 2</span>
+        <h2 id="lbl-acepta">¿Le gustaría que la persona encargada del seguimiento del grupo le llame para platicar sobre el desempeño del alumno?</h2>
+        <div class="decision" role="radiogroup" aria-labelledby="lbl-acepta" data-grupo="acepta">
+          <input type="radio" name="acepta" id="a-si" value="Sí">
+          <label for="a-si"><span class="grande">Sí</span><span class="chica">Quiero que me llamen</span></label>
+          <input type="radio" name="acepta" id="a-no" value="No">
+          <label for="a-no"><span class="grande">No</span><span class="chica">Por ahora no, gracias</span></label>
+        </div>
+
+        <div id="bloque-si" class="bloque-si oculto">
+          <label class="campo" for="telefono">¿A qué número le podemos llamar?</label>
+          <input type="tel" id="telefono" name="telefono" inputmode="numeric" autocomplete="tel-national" maxlength="14" placeholder="10 dígitos, ej. 55 1234 5678">
+
+          <label class="campo" id="lbl-horario">Horario que le acomoda <span class="opcional">(puede elegir varios)</span></label>
+          <div class="opciones" role="group" aria-labelledby="lbl-horario" data-grupo="horario">
+            <input type="checkbox" name="horario" id="h1" value="Mañana (9 a 12 h)"><label for="h1">Mañana · 9 a 12</label>
+            <input type="checkbox" name="horario" id="h2" value="Mediodía (12 a 15 h)"><label for="h2">Mediodía · 12 a 15</label>
+            <input type="checkbox" name="horario" id="h3" value="Tarde (15 a 18 h)"><label for="h3">Tarde · 15 a 18</label>
+            <input type="checkbox" name="horario" id="h4" value="Noche (18 a 20 h)"><label for="h4">Noche · 18 a 20</label>
+          </div>
+          <p class="ayuda">Llamamos de lunes a viernes. Si prefiere otro horario, escríbalo abajo.</p>
+          <label class="campo" for="horario_otro">Otro horario o indicación <span class="opcional">(opcional)</span></label>
+          <input type="text" id="horario_otro" name="horario_otro" maxlength="120" placeholder="Ej. después de las 7 pm, o mejor por WhatsApp">
+        </div>
+      </section>
+
+      <!-- 3. Quien responde -->
+      <section class="seccion">
+        <span class="paso">Paso 3</span>
+        <h2 id="lbl-parentesco">¿Qué parentesco tiene con el alumno?</h2>
+        <div class="opciones" role="radiogroup" aria-labelledby="lbl-parentesco" data-grupo="parentesco">
+          <input type="radio" name="parentesco" id="r-mama" value="Mamá"><label for="r-mama">Mamá</label>
+          <input type="radio" name="parentesco" id="r-papa" value="Papá"><label for="r-papa">Papá</label>
+          <input type="radio" name="parentesco" id="r-abuelo" value="Abuelo(a)"><label for="r-abuelo">Abuelo(a)</label>
+          <input type="radio" name="parentesco" id="r-otro" value="Otro"><label for="r-otro">Otro</label>
+        </div>
+        <div id="bloque-otro" class="oculto">
+          <label class="campo" for="parentesco_otro">¿Cuál?</label>
+          <input type="text" id="parentesco_otro" name="parentesco_otro" maxlength="60" placeholder="Ej. tía, tutor, hermano">
+        </div>
+
+        <label class="campo" for="responde">Nombre de quien responde</label>
+        <input type="text" id="responde" name="responde" autocomplete="name" maxlength="120" placeholder="Nombre y apellidos">
+      </section>
+
+      <div class="hp" aria-hidden="true">
+        <label for="sitio">No llenar</label><input type="text" id="sitio" name="sitio" tabindex="-1" autocomplete="off">
+      </div>
+
+      <label class="privacidad" id="bloque-priv">
+        <input type="checkbox" id="privacidad" name="privacidad">
+        <span>Acepto que CONAMAT Hidalgo – San Cosme use estos datos únicamente para dar seguimiento académico al alumno y comunicarse conmigo. No se comparten con nadie más.</span>
+      </label>
+
+      <button type="submit" class="enviar" id="enviar">Enviar respuesta</button>
+      <p class="aviso-envio oculto" id="aviso-envio" role="alert"></p>
+
+      <p class="frase">¡El éxito no se logra con la suerte, es el resultado de un esfuerzo constante!</p>
+    </form>
+
+    <div id="gracias" class="gracias oculto" tabindex="-1">
+      <div class="palomita" aria-hidden="true">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      </div>
+      <h1>¡Gracias!</h1>
+      <p id="gracias-texto">Recibimos su respuesta.</p>
+      <div class="resumen" id="resumen"></div>
+      <p class="frase">¡El éxito no se logra con la suerte, es el resultado de un esfuerzo constante!</p>
+      <button type="button" class="enlace" id="otra">Registrar a otro alumno</button>
+    </div>
+  </div>
+
+  <footer>
+    CONAMAT Plantel Hidalgo – San Cosme · <a href="https://www.conamathidalgo.com/" target="_blank" rel="noopener">conamathidalgo.com</a>
+  </footer>
+</main>
+
+<script src="config.js"></script>
+<script>
+(function () {
+  'use strict';
+  var form = document.getElementById('formulario');
+  var bloqueSi = document.getElementById('bloque-si');
+  var bloqueOtro = document.getElementById('bloque-otro');
+  var boton = document.getElementById('enviar');
+  var avisoEnvio = document.getElementById('aviso-envio');
+
+  // Liga pre-llenada: ?curso=UNAM&plantel=Hidalgo&grupo=3
+  var params = new URLSearchParams(location.search);
+  function preseleccionar(nombre) {
+    var v = (params.get(nombre) || '').trim().toLowerCase();
+    if (!v) return;
+    form.querySelectorAll('input[name="' + nombre + '"]').forEach(function (i) {
+      if (i.value.toLowerCase().replace(/\s/g, '') === v.replace(/\s/g, '')) i.checked = true;
+    });
+  }
+  preseleccionar('curso');
+  preseleccionar('plantel');
+  if (params.get('grupo')) form.grupo.value = params.get('grupo').slice(0, 30);
+
+  function valorRadio(nombre) {
+    var el = form.querySelector('input[name="' + nombre + '"]:checked');
+    return el ? el.value : '';
+  }
+  function actualizarVisibles() {
+    bloqueSi.classList.toggle('oculto', valorRadio('acepta') !== 'Sí');
+    bloqueOtro.classList.toggle('oculto', valorRadio('parentesco') !== 'Otro');
+  }
+  form.addEventListener('change', function (e) {
+    actualizarVisibles();
+    var g = e.target.closest('[data-grupo]');
+    if (g) limpiarError(g);
+    if (e.target.id === 'privacidad') limpiarError(document.getElementById('bloque-priv'));
+  });
+  form.addEventListener('input', function (e) {
+    if (e.target.matches('input[type=text], input[type=tel]')) limpiarError(e.target);
+  });
+
+  // Teléfono: sólo dígitos, formato 55 1234 5678
+  var tel = form.telefono;
+  tel.addEventListener('input', function () {
+    var d = tel.value.replace(/\D/g, '').slice(0, 10);
+    var f = d;
+    if (d.length > 6) f = d.slice(0, 2) + ' ' + d.slice(2, 6) + ' ' + d.slice(6);
+    else if (d.length > 2) f = d.slice(0, 2) + ' ' + d.slice(2);
+    tel.value = f;
+  });
+
+  function marcarError(el, msg) {
+    el.classList.add(el.matches('[data-grupo]') ? 'grupo-invalido' : 'invalido');
+    var p = document.createElement('p');
+    p.className = 'error';
+    p.textContent = msg;
+    p.dataset.de = el.id || el.dataset.grupo;
+    el.insertAdjacentElement('afterend', p);
+  }
+  function limpiarError(el) {
+    el.classList.remove('invalido', 'grupo-invalido');
+    var sig = el.nextElementSibling;
+    if (sig && sig.classList.contains('error')) sig.remove();
+  }
+  function limpiarTodo() {
+    form.querySelectorAll('.error').forEach(function (e) { e.remove(); });
+    form.querySelectorAll('.invalido, .grupo-invalido').forEach(function (e) { e.classList.remove('invalido', 'grupo-invalido'); });
+  }
+  function grupo(nombre) { return form.querySelector('[data-grupo="' + nombre + '"]'); }
+  function limpio(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
+
+  function validar() {
+    limpiarTodo();
+    var errores = [];
+    function err(el, msg) { marcarError(el, msg); errores.push(el); }
+
+    if (!valorRadio('curso')) err(grupo('curso'), 'Elija el curso.');
+    if (!valorRadio('plantel')) err(grupo('plantel'), 'Elija el plantel.');
+    var alumno = limpio(form.alumno.value);
+    if (alumno.length < 5 || alumno.indexOf(' ') < 0) err(form.alumno, 'Escriba nombre y apellido del alumno.');
+    if (!limpio(form.grupo.value)) err(form.grupo, 'Escriba el grupo.');
+
+    var acepta = valorRadio('acepta');
+    if (!acepta) err(grupo('acepta'), 'Elija Sí o No.');
+    if (acepta === 'Sí') {
+      if (tel.value.replace(/\D/g, '').length !== 10) err(tel, 'El teléfono debe tener 10 dígitos.');
+      var horarios = form.querySelectorAll('input[name="horario"]:checked').length;
+      if (!horarios && !limpio(form.horario_otro.value)) err(grupo('horario'), 'Elija un horario o escríbalo abajo.');
+    }
+
+    var par = valorRadio('parentesco');
+    if (!par) err(grupo('parentesco'), 'Elija una opción.');
+    if (par === 'Otro' && !limpio(form.parentesco_otro.value)) err(form.parentesco_otro, 'Indique el parentesco.');
+    var resp = limpio(form.responde.value);
+    if (resp.length < 5 || resp.indexOf(' ') < 0) err(form.responde, 'Escriba su nombre y apellido.');
+
+    if (!form.privacidad.checked) err(document.getElementById('bloque-priv'), 'Necesitamos su autorización para guardar los datos.');
+
+    if (errores.length) {
+      errores[0].scrollIntoView({ behavior: 'smooth', block: 'center' });
+      var foco = errores[0].matches('input') ? errores[0] : errores[0].querySelector('input');
+      if (foco) setTimeout(function () { foco.focus({ preventScroll: true }); }, 350);
+    }
+    return errores.length === 0;
+  }
+
+  function datos() {
+    var acepta = valorRadio('acepta');
+    var horarios = Array.prototype.map.call(form.querySelectorAll('input[name="horario"]:checked'), function (i) { return i.value; });
+    var otro = limpio(form.horario_otro.value);
+    if (otro) horarios.push(otro);
+    var par = valorRadio('parentesco');
+    return {
+      curso: valorRadio('curso'),
+      plantel: valorRadio('plantel'),
+      alumno: limpio(form.alumno.value),
+      grupo: limpio(form.grupo.value),
+      acepta: acepta,
+      telefono: acepta === 'Sí' ? tel.value.replace(/\D/g, '') : '',
+      horario: acepta === 'Sí' ? horarios.join('; ') : '',
+      parentesco: par === 'Otro' ? 'Otro: ' + limpio(form.parentesco_otro.value) : par,
+      responde: limpio(form.responde.value),
+      sitio: form.sitio.value
+    };
+  }
+
+  function mostrarGracias(d) {
+    form.classList.add('oculto');
+    var g = document.getElementById('gracias');
+    document.getElementById('gracias-texto').textContent = d.acepta === 'Sí'
+      ? 'La persona encargada del seguimiento del grupo se comunicará con usted en el horario que nos indicó.'
+      : 'Respetamos su decisión. Si cambia de opinión, puede volver a llenar este formulario o acercarse al plantel.';
+    var r = document.getElementById('resumen');
+    r.textContent = '';
+    [['Alumno', d.alumno], ['Curso', d.curso + ' · Grupo ' + d.grupo + ' · ' + d.plantel], ['Seguimiento', d.acepta],
+     d.acepta === 'Sí' ? ['Teléfono', d.telefono.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')] : null,
+     d.acepta === 'Sí' ? ['Horario', d.horario] : null,
+     ['Responde', d.responde + ' (' + d.parentesco + ')']].forEach(function (f) {
+      if (!f) return;
+      var div = document.createElement('div');
+      var b = document.createElement('b'); b.textContent = f[0] + ': ';
+      div.appendChild(b); div.appendChild(document.createTextNode(f[1]));
+      r.appendChild(div);
+    });
+    g.classList.remove('oculto');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+    g.focus({ preventScroll: true });
+  }
+
+  function errorEnvio(msg) {
+    avisoEnvio.textContent = msg;
+    avisoEnvio.classList.remove('oculto');
+    boton.disabled = false;
+    boton.textContent = 'Enviar respuesta';
+  }
+
+  form.addEventListener('submit', function (e) {
+    e.preventDefault();
+    avisoEnvio.classList.add('oculto');
+    if (!validar()) return;
+    var url = (window.SEGUIMIENTO_CONFIG || {}).urlRespuestas;
+    if (!url) { errorEnvio('El formulario aún no está conectado. Avise al plantel, por favor.'); return; }
+
+    var d = datos();
+    boton.disabled = true;
+    boton.textContent = 'Enviando…';
+    // text/plain evita la verificación CORS previa que Apps Script no admite
+    fetch(url, { method: 'POST', headers: { 'Content-Type': 'text/plain;charset=utf-8' }, body: JSON.stringify(d) })
+      .then(function (r) { return r.json(); })
+      .then(function (res) {
+        if (res && res.ok) mostrarGracias(d);
+        else errorEnvio((res && res.error) || 'No se pudo guardar. Intente de nuevo.');
+      })
+      .catch(function () { errorEnvio('No pudimos enviar su respuesta. Revise su conexión e intente de nuevo.'); });
+  });
+
+  document.getElementById('otra').addEventListener('click', function () {
+    var curso = valorRadio('curso'), plantel = valorRadio('plantel'), grp = form.grupo.value;
+    var par = valorRadio('parentesco'), parOtro = form.parentesco_otro.value, resp = form.responde.value;
+    var acepta = valorRadio('acepta'), telefono = tel.value;
+    var horarios = Array.prototype.map.call(form.querySelectorAll('input[name="horario"]:checked'), function (i) { return i.id; });
+    var horOtro = form.horario_otro.value;
+    form.reset();
+    // Conserva los datos de quien responde (p. ej. hermanos en el mismo curso)
+    [['curso', curso], ['plantel', plantel], ['parentesco', par], ['acepta', acepta]].forEach(function (p) {
+      var el = form.querySelector('input[name="' + p[0] + '"][value="' + p[1] + '"]');
+      if (el) el.checked = true;
+    });
+    horarios.forEach(function (id) { document.getElementById(id).checked = true; });
+    form.grupo.value = grp; form.parentesco_otro.value = parOtro; form.responde.value = resp;
+    tel.value = telefono; form.horario_otro.value = horOtro;
+    actualizarVisibles();
+    boton.disabled = false; boton.textContent = 'Enviar respuesta';
+    document.getElementById('gracias').classList.add('oculto');
+    form.classList.remove('oculto');
+    form.alumno.focus();
+    form.alumno.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  });
+
+  actualizarVisibles();
+})();
+</script>
+</body>
+</html>
