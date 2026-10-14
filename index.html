@@ -172,6 +172,13 @@
   .resumen div { padding: 3px 0; }
   .resumen b { color: var(--texto); }
   .enlace { background: none; border: 0; color: var(--azul); font: inherit; font-weight: 700; text-decoration: underline; cursor: pointer; margin-top: 18px; }
+  /* Texto justificado */
+  .intro, .seccion h2, .ayuda, .privacidad span, .gracias p, .resumen div, .error {
+    text-align: justify;
+    hyphens: auto;
+    -webkit-hyphens: auto;
+  }
+  .frase, footer { text-align: justify; text-align-last: center; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 </style>
 </head>
