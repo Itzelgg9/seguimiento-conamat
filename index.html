@@ -100,7 +100,8 @@
   .opciones input:checked + label { background: var(--azul); border-color: var(--azul); color: #fff; }
   .opciones input:focus-visible + label { box-shadow: 0 0 0 4px rgba(53, 79, 139, .25); }
 
-  .grupos { display: grid; grid-template-columns: 1fr 1fr; }
+  .grupos { display: grid; grid-template-columns: 1fr; }
+  @media (min-width: 560px) { .grupos { grid-template-columns: 1fr 1fr; } }
   .grupos label { flex-direction: column; align-items: flex-start; gap: 0; border-radius: 14px; padding: 10px 16px; line-height: 1.25; }
   .grupos label small { font-size: 13px; font-weight: 600; color: var(--suave); }
   .grupos input:checked + label small { color: #dde4f3; }
@@ -309,15 +310,20 @@
 (function () {
   'use strict';
 
-  // Grupos por curso y plantel. turno decide en qué horario se llama:
-  // manana → 8 a 14 h · tarde → 15 a 19 h · finde → fin de semana por la mañana o entre semana 12 a 14 h
+  // Grupos por curso y plantel. id va en la liga (?grupo=) y es único; clave y clases se muestran
+  // y se guardan en la hoja. turno decide en qué horario se llama:
+  // manana → 8 a 14 h · tarde → 15 a 19 h · finde / sabado → fin de semana por la mañana o entre semana 12 a 14 h
   var GRUPOS = {
     'UNAM|Hidalgo': [
-      { clave: 'HIU14401-1', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
-      { clave: 'HIU14401-2', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
-      { clave: 'HIU14401-3', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
-      { clave: 'HIU14401-4', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
-      { clave: 'HIU14402', clases: 'Sáb y dom, 9\u00a0a\u00a014\u00a0h', turno: 'finde' }
+      { id: 'HIU14401-27', clave: 'HIU14401-27', clases: 'LMV, 11 a 13 h · inicio 31 ago, 5 o 19 oct', turno: 'manana' },
+      { id: 'HIU14401-4-27', clave: 'HIU14401-4/27', clases: 'LMV (LAV), 11 a 13 h · inicio 2 nov', turno: 'manana' },
+      { id: 'HIU14402-27-SAB', clave: 'HIU14402-27', clases: 'Sábados, 9 a 14 h · inicio 19 sep o 3 oct', turno: 'sabado' },
+      { id: 'HIU14402-27-SYD', clave: 'HIU14402-27', clases: 'Sáb y dom, 9 a 14 h · inicio 31 oct', turno: 'finde' }
+    ],
+    'UNAM|San Cosme': [
+      { id: 'IU14401-27', clave: 'IU14401-27', clases: 'Sáb y dom, 9 a 12 h', turno: 'finde' },
+      { id: 'IU14402-27', clave: 'IU14402-27', clases: 'Lun a jue, 11 a 13 h', turno: 'manana' },
+      { id: 'IU14403-27', clave: 'IU14403-27', clases: 'Lun a jue, 17 a 19 h', turno: 'tarde' }
     ]
   };
   var HORARIOS = {
@@ -332,6 +338,10 @@
     finde: {
       opciones: ['Sábado por la mañana', 'Domingo por la mañana', 'Entre semana, 12 a 14 h'],
       ayuda: 'Como el grupo toma clases en fin de semana, llamamos sábado o domingo por la mañana, o entre semana de 12 a 14 h.'
+    },
+    sabado: {
+      opciones: ['Sábado por la mañana', 'Entre semana, 12 a 14 h'],
+      ayuda: 'Como el grupo toma clases los sábados, llamamos el sábado por la mañana o entre semana de 12 a 14 h.'
     },
     general: {
       opciones: ['Mañana, 8 a 14 h', 'Tarde, 15 a 19 h', 'Fin de semana por la mañana'],
@@ -368,7 +378,7 @@
   function grupoElegido() {
     var lista = gruposActuales(), clave = valorRadio('grupo_lista');
     if (!lista) return null;
-    for (var i = 0; i < lista.length; i++) if (lista[i].clave === clave) return lista[i];
+    for (var i = 0; i < lista.length; i++) if (lista[i].id === clave) return lista[i];
     return null;
   }
 
@@ -379,13 +389,13 @@
     grupoEspera.classList.toggle('oculto', !!listos);
     grupoLista.textContent = '';
     if (listos && lista) {
-      lista.concat([{ clave: OTRO_GRUPO, clases: 'Mi grupo no aparece' }]).forEach(function (g, n) {
+      lista.concat([{ id: OTRO_GRUPO, clave: 'Otro', clases: 'Mi grupo no aparece' }]).forEach(function (g, n) {
         var input = document.createElement('input');
-        input.type = 'radio'; input.name = 'grupo_lista'; input.id = 'g' + n; input.value = g.clave;
-        if (g.clave === previo) input.checked = true;
+        input.type = 'radio'; input.name = 'grupo_lista'; input.id = 'g' + n; input.value = g.id;
+        if (g.id === previo) input.checked = true;
         var label = document.createElement('label');
         label.htmlFor = input.id;
-        label.appendChild(document.createTextNode(g.clave === OTRO_GRUPO ? 'Otro' : g.clave));
+        label.appendChild(document.createTextNode(g.clave));
         var small = document.createElement('small'); small.textContent = g.clases;
         label.appendChild(small);
         grupoLista.appendChild(input); grupoLista.appendChild(label);
@@ -436,7 +446,7 @@
   var grupoParam = (params.get('grupo') || '').trim().slice(0, 80);
   if (grupoParam) {
     var lista0 = gruposActuales();
-    var hallado = lista0 && lista0.some(function (g) { return g.clave.toLowerCase() === grupoParam.toLowerCase(); });
+    var hallado = lista0 && lista0.some(function (g) { return g.id.toLowerCase() === grupoParam.toLowerCase(); });
     if (hallado) {
       form.querySelectorAll('input[name="grupo_lista"]').forEach(function (i) { i.checked = i.value.toLowerCase() === grupoParam.toLowerCase(); });
     } else {
@@ -489,7 +499,7 @@
   function limpio(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
   function valorGrupo() {
     var g = grupoElegido();
-    return g ? g.clave : limpio(form.grupo.value);
+    return g ? g.clave + ' · ' + g.clases.replace(/\u00a0/g, ' ') : limpio(form.grupo.value);
   }
 
   function validar() {
