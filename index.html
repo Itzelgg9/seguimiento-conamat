@@ -100,6 +100,11 @@
   .opciones input:checked + label { background: var(--azul); border-color: var(--azul); color: #fff; }
   .opciones input:focus-visible + label { box-shadow: 0 0 0 4px rgba(53, 79, 139, .25); }
 
+  .grupos { display: grid; grid-template-columns: 1fr 1fr; }
+  .grupos label { flex-direction: column; align-items: flex-start; gap: 0; border-radius: 14px; padding: 10px 16px; line-height: 1.25; }
+  .grupos label small { font-size: 13px; font-weight: 600; color: var(--suave); }
+  .grupos input:checked + label small { color: #dde4f3; }
+
   /* Sí / No grandes */
   .decision { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .decision input { position: absolute; opacity: 0; pointer-events: none; }
@@ -178,6 +183,7 @@
     hyphens: auto;
     -webkit-hyphens: auto;
   }
+  .seccion h2 { hyphens: manual; -webkit-hyphens: manual; }
   .frase, footer { text-align: justify; text-align-last: center; }
   .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
 </style>
@@ -215,9 +221,13 @@
           <input type="radio" name="plantel" id="p-sancosme" value="San Cosme"><label for="p-sancosme">San Cosme</label>
         </div>
 
-        <label class="campo" for="grupo">Grupo de WhatsApp</label>
-        <input type="text" id="grupo" name="grupo" autocomplete="off" maxlength="80" placeholder="Ej. UNAM Sabatino Hidalgo">
-        <p class="ayuda">El nombre del grupo de WhatsApp en el que está añadido, tal como aparece.</p>
+        <label class="campo" id="lbl-grupo">Grupo</label>
+        <p class="ayuda" id="grupo-espera">Primero elija el curso y el plantel.</p>
+        <div class="opciones grupos oculto" role="radiogroup" aria-labelledby="lbl-grupo" data-grupo="grupo_lista" id="grupo-lista"></div>
+        <div id="grupo-libre" class="oculto">
+          <input type="text" id="grupo" name="grupo" autocomplete="off" maxlength="80" placeholder="Ej. UNAM Sabatino Hidalgo" aria-labelledby="lbl-grupo">
+          <p class="ayuda">Escriba el nombre del grupo de WhatsApp en el que está añadido el alumno.</p>
+        </div>
       </section>
 
       <!-- 2. Seguimiento -->
@@ -236,15 +246,10 @@
           <input type="tel" id="telefono" name="telefono" inputmode="numeric" autocomplete="tel-national" maxlength="14" placeholder="10 dígitos, ej. 55 1234 5678">
 
           <label class="campo" id="lbl-horario">Horario que le acomoda <span class="opcional">(puede elegir varios)</span></label>
-          <div class="opciones" role="group" aria-labelledby="lbl-horario" data-grupo="horario">
-            <input type="checkbox" name="horario" id="h1" value="Mañana (9 a 12 h)"><label for="h1">Mañana · 9 a 12</label>
-            <input type="checkbox" name="horario" id="h2" value="Mediodía (12 a 15 h)"><label for="h2">Mediodía · 12 a 15</label>
-            <input type="checkbox" name="horario" id="h3" value="Tarde (15 a 18 h)"><label for="h3">Tarde · 15 a 18</label>
-            <input type="checkbox" name="horario" id="h4" value="Noche (18 a 20 h)"><label for="h4">Noche · 18 a 20</label>
-          </div>
-          <p class="ayuda">Llamamos de lunes a viernes. Si prefiere otro horario, escríbalo abajo.</p>
-          <label class="campo" for="horario_otro">Otro horario o indicación <span class="opcional">(opcional)</span></label>
-          <input type="text" id="horario_otro" name="horario_otro" maxlength="120" placeholder="Ej. después de las 7 pm, o mejor por WhatsApp">
+          <div class="opciones" role="group" aria-labelledby="lbl-horario" data-grupo="horario" id="horario-opciones"></div>
+          <p class="ayuda" id="horario-ayuda"></p>
+          <label class="campo" for="horario_otro">Alguna indicación <span class="opcional">(opcional)</span></label>
+          <input type="text" id="horario_otro" name="horario_otro" maxlength="120" placeholder="Ej. mejor por WhatsApp, o después de las 12">
         </div>
       </section>
 
@@ -303,34 +308,149 @@
 <script>
 (function () {
   'use strict';
+
+  // Grupos por curso y plantel. turno decide en qué horario se llama:
+  // manana → 8 a 14 h · tarde → 15 a 19 h · finde → fin de semana por la mañana o entre semana 12 a 14 h
+  var GRUPOS = {
+    'UNAM|Hidalgo': [
+      { clave: 'HIU14401-1', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
+      { clave: 'HIU14401-2', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
+      { clave: 'HIU14401-3', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
+      { clave: 'HIU14401-4', clases: '11\u00a0a\u00a013\u00a0h', turno: 'manana' },
+      { clave: 'HIU14402', clases: 'Sáb y dom, 9\u00a0a\u00a014\u00a0h', turno: 'finde' }
+    ]
+  };
+  var HORARIOS = {
+    manana: {
+      opciones: ['Mañana, 8 a 10 h', 'Mañana, 10 a 12 h', 'Mañana, 12 a 14 h'],
+      ayuda: 'Como el grupo toma clases por la mañana, las llamadas son de 8 a 14 h.'
+    },
+    tarde: {
+      opciones: ['Tarde, 15 a 17 h', 'Tarde, 17 a 19 h'],
+      ayuda: 'Como el grupo toma clases por la tarde, las llamadas son de 15 a 19 h.'
+    },
+    finde: {
+      opciones: ['Sábado por la mañana', 'Domingo por la mañana', 'Entre semana, 12 a 14 h'],
+      ayuda: 'Como el grupo toma clases en fin de semana, llamamos sábado o domingo por la mañana, o entre semana de 12 a 14 h.'
+    },
+    general: {
+      opciones: ['Mañana, 8 a 14 h', 'Tarde, 15 a 19 h', 'Fin de semana por la mañana'],
+      ayuda: 'Elija el horario en el que mejor le podemos llamar.'
+    }
+  };
+  var OTRO_GRUPO = '__otro';
+
   var form = document.getElementById('formulario');
   var bloqueSi = document.getElementById('bloque-si');
   var bloqueOtro = document.getElementById('bloque-otro');
   var boton = document.getElementById('enviar');
   var avisoEnvio = document.getElementById('aviso-envio');
-
-  // Liga pre-llenada: ?curso=UNAM&plantel=Hidalgo&grupo=3
-  var params = new URLSearchParams(location.search);
-  function preseleccionar(nombre) {
-    var v = (params.get(nombre) || '').trim().toLowerCase();
-    if (!v) return;
-    form.querySelectorAll('input[name="' + nombre + '"]').forEach(function (i) {
-      if (i.value.toLowerCase().replace(/\s/g, '') === v.replace(/\s/g, '')) i.checked = true;
-    });
-  }
-  preseleccionar('curso');
-  preseleccionar('plantel');
-  if (params.get('grupo')) form.grupo.value = params.get('grupo').slice(0, 80);
+  var grupoEspera = document.getElementById('grupo-espera');
+  var grupoLista = document.getElementById('grupo-lista');
+  var grupoLibre = document.getElementById('grupo-libre');
+  var horarioOpciones = document.getElementById('horario-opciones');
+  var horarioAyuda = document.getElementById('horario-ayuda');
+  var tel = form.telefono;
 
   function valorRadio(nombre) {
     var el = form.querySelector('input[name="' + nombre + '"]:checked');
     return el ? el.value : '';
   }
+  function marcar(nombre, valor) {
+    form.querySelectorAll('input[name="' + nombre + '"]').forEach(function (i) { i.checked = i.value === valor; });
+  }
+  function horariosMarcados() {
+    return Array.prototype.map.call(form.querySelectorAll('input[name="horario"]:checked'), function (i) { return i.value; });
+  }
+  function gruposActuales() {
+    return GRUPOS[valorRadio('curso') + '|' + valorRadio('plantel')] || null;
+  }
+  function grupoElegido() {
+    var lista = gruposActuales(), clave = valorRadio('grupo_lista');
+    if (!lista) return null;
+    for (var i = 0; i < lista.length; i++) if (lista[i].clave === clave) return lista[i];
+    return null;
+  }
+
+  function pintarGrupos() {
+    var lista = gruposActuales();
+    var listos = valorRadio('curso') && valorRadio('plantel');
+    var previo = valorRadio('grupo_lista');
+    grupoEspera.classList.toggle('oculto', !!listos);
+    grupoLista.textContent = '';
+    if (listos && lista) {
+      lista.concat([{ clave: OTRO_GRUPO, clases: 'Mi grupo no aparece' }]).forEach(function (g, n) {
+        var input = document.createElement('input');
+        input.type = 'radio'; input.name = 'grupo_lista'; input.id = 'g' + n; input.value = g.clave;
+        if (g.clave === previo) input.checked = true;
+        var label = document.createElement('label');
+        label.htmlFor = input.id;
+        label.appendChild(document.createTextNode(g.clave === OTRO_GRUPO ? 'Otro' : g.clave));
+        var small = document.createElement('small'); small.textContent = g.clases;
+        label.appendChild(small);
+        grupoLista.appendChild(input); grupoLista.appendChild(label);
+      });
+    }
+    grupoLista.classList.toggle('oculto', !(listos && lista));
+    actualizarGrupoLibre();
+  }
+  function actualizarGrupoLibre() {
+    var listos = valorRadio('curso') && valorRadio('plantel');
+    var lista = gruposActuales();
+    grupoLibre.classList.toggle('oculto', !(listos && (!lista || valorRadio('grupo_lista') === OTRO_GRUPO)));
+  }
+
+  function pintarHorarios() {
+    var g = grupoElegido();
+    var h = HORARIOS[g ? g.turno : 'general'];
+    var previos = horariosMarcados();
+    horarioOpciones.textContent = '';
+    h.opciones.forEach(function (op, n) {
+      var input = document.createElement('input');
+      input.type = 'checkbox'; input.name = 'horario'; input.id = 'h' + n; input.value = op;
+      if (previos.indexOf(op) >= 0) input.checked = true;
+      var label = document.createElement('label');
+      label.htmlFor = input.id; label.textContent = op;
+      horarioOpciones.appendChild(input); horarioOpciones.appendChild(label);
+    });
+    horarioAyuda.textContent = h.ayuda;
+  }
+
   function actualizarVisibles() {
     bloqueSi.classList.toggle('oculto', valorRadio('acepta') !== 'Sí');
     bloqueOtro.classList.toggle('oculto', valorRadio('parentesco') !== 'Otro');
   }
+
+  // Liga pre-llenada: ?curso=UNAM&plantel=Hidalgo&grupo=HIU14402
+  var params = new URLSearchParams(location.search);
+  function preseleccionar(nombre) {
+    var v = (params.get(nombre) || '').trim().toLowerCase().replace(/\s/g, '');
+    if (!v) return;
+    form.querySelectorAll('input[name="' + nombre + '"]').forEach(function (i) {
+      if (i.value.toLowerCase().replace(/\s/g, '') === v) i.checked = true;
+    });
+  }
+  preseleccionar('curso');
+  preseleccionar('plantel');
+  pintarGrupos();
+  var grupoParam = (params.get('grupo') || '').trim().slice(0, 80);
+  if (grupoParam) {
+    var lista0 = gruposActuales();
+    var hallado = lista0 && lista0.some(function (g) { return g.clave.toLowerCase() === grupoParam.toLowerCase(); });
+    if (hallado) {
+      form.querySelectorAll('input[name="grupo_lista"]').forEach(function (i) { i.checked = i.value.toLowerCase() === grupoParam.toLowerCase(); });
+    } else {
+      if (lista0) marcar('grupo_lista', OTRO_GRUPO);
+      form.grupo.value = grupoParam;
+    }
+    actualizarGrupoLibre();
+  }
+  pintarHorarios();
+
   form.addEventListener('change', function (e) {
+    var nombre = e.target.name;
+    if (nombre === 'curso' || nombre === 'plantel') { pintarGrupos(); pintarHorarios(); limpiarError(grupoLista); limpiarError(form.grupo); }
+    if (nombre === 'grupo_lista') { actualizarGrupoLibre(); pintarHorarios(); }
     actualizarVisibles();
     var g = e.target.closest('[data-grupo]');
     if (g) limpiarError(g);
@@ -341,7 +461,6 @@
   });
 
   // Teléfono: sólo dígitos, formato 55 1234 5678
-  var tel = form.telefono;
   tel.addEventListener('input', function () {
     var d = tel.value.replace(/\D/g, '').slice(0, 10);
     var f = d;
@@ -355,7 +474,6 @@
     var p = document.createElement('p');
     p.className = 'error';
     p.textContent = msg;
-    p.dataset.de = el.id || el.dataset.grupo;
     el.insertAdjacentElement('afterend', p);
   }
   function limpiarError(el) {
@@ -369,24 +487,30 @@
   }
   function grupo(nombre) { return form.querySelector('[data-grupo="' + nombre + '"]'); }
   function limpio(s) { return (s || '').replace(/\s+/g, ' ').trim(); }
+  function valorGrupo() {
+    var g = grupoElegido();
+    return g ? g.clave : limpio(form.grupo.value);
+  }
 
   function validar() {
     limpiarTodo();
     var errores = [];
     function err(el, msg) { marcarError(el, msg); errores.push(el); }
 
-    if (!valorRadio('curso')) err(grupo('curso'), 'Elija el curso.');
-    if (!valorRadio('plantel')) err(grupo('plantel'), 'Elija el plantel.');
     var alumno = limpio(form.alumno.value);
     if (alumno.length < 5 || alumno.indexOf(' ') < 0) err(form.alumno, 'Escriba nombre y apellido del alumno.');
-    if (!limpio(form.grupo.value)) err(form.grupo, 'Escriba el nombre del grupo de WhatsApp.');
+    if (!valorRadio('curso')) err(grupo('curso'), 'Elija el curso.');
+    if (!valorRadio('plantel')) err(grupo('plantel'), 'Elija el plantel.');
+    if (valorRadio('curso') && valorRadio('plantel')) {
+      if (gruposActuales() && !valorRadio('grupo_lista')) err(grupoLista, 'Elija el grupo del alumno.');
+      else if (!valorGrupo()) err(form.grupo, 'Escriba el nombre del grupo de WhatsApp.');
+    }
 
     var acepta = valorRadio('acepta');
     if (!acepta) err(grupo('acepta'), 'Elija Sí o No.');
     if (acepta === 'Sí') {
       if (tel.value.replace(/\D/g, '').length !== 10) err(tel, 'El teléfono debe tener 10 dígitos.');
-      var horarios = form.querySelectorAll('input[name="horario"]:checked').length;
-      if (!horarios && !limpio(form.horario_otro.value)) err(grupo('horario'), 'Elija un horario o escríbalo abajo.');
+      if (!horariosMarcados().length) err(grupo('horario'), 'Elija al menos un horario.');
     }
 
     var par = valorRadio('parentesco');
@@ -407,15 +531,15 @@
 
   function datos() {
     var acepta = valorRadio('acepta');
-    var horarios = Array.prototype.map.call(form.querySelectorAll('input[name="horario"]:checked'), function (i) { return i.value; });
-    var otro = limpio(form.horario_otro.value);
-    if (otro) horarios.push(otro);
+    var horarios = horariosMarcados();
+    var nota = limpio(form.horario_otro.value);
+    if (nota) horarios.push(nota);
     var par = valorRadio('parentesco');
     return {
       curso: valorRadio('curso'),
       plantel: valorRadio('plantel'),
       alumno: limpio(form.alumno.value),
-      grupo: limpio(form.grupo.value),
+      grupo: valorGrupo(),
       acepta: acepta,
       telefono: acepta === 'Sí' ? tel.value.replace(/\D/g, '') : '',
       horario: acepta === 'Sí' ? horarios.join('; ') : '',
@@ -433,7 +557,7 @@
       : 'Respetamos su decisión. Si cambia de opinión, puede volver a llenar este formulario o acercarse al plantel.';
     var r = document.getElementById('resumen');
     r.textContent = '';
-    [['Alumno', d.alumno], ['Curso', d.curso + ' · ' + d.plantel], ['Grupo de WhatsApp', d.grupo], ['Seguimiento', d.acepta],
+    [['Alumno', d.alumno], ['Curso', d.curso + ' · ' + d.plantel], ['Grupo', d.grupo], ['Seguimiento', d.acepta],
      d.acepta === 'Sí' ? ['Teléfono', d.telefono.replace(/(\d{2})(\d{4})(\d{4})/, '$1 $2 $3')] : null,
      d.acepta === 'Sí' ? ['Horario', d.horario] : null,
      ['Responde', d.responde + ' (' + d.parentesco + ')']].forEach(function (f) {
@@ -476,20 +600,23 @@
   });
 
   document.getElementById('otra').addEventListener('click', function () {
-    var curso = valorRadio('curso'), plantel = valorRadio('plantel'), grp = form.grupo.value;
-    var par = valorRadio('parentesco'), parOtro = form.parentesco_otro.value, resp = form.responde.value;
-    var acepta = valorRadio('acepta'), telefono = tel.value;
-    var horarios = Array.prototype.map.call(form.querySelectorAll('input[name="horario"]:checked'), function (i) { return i.id; });
-    var horOtro = form.horario_otro.value;
+    // Conserva los datos de quien responde y del grupo (p. ej. hermanos en el mismo curso)
+    var guardado = {
+      curso: valorRadio('curso'), plantel: valorRadio('plantel'), grupo_lista: valorRadio('grupo_lista'),
+      parentesco: valorRadio('parentesco'), acepta: valorRadio('acepta'), horarios: horariosMarcados(),
+      grupo: form.grupo.value, parentesco_otro: form.parentesco_otro.value, responde: form.responde.value,
+      telefono: tel.value, horario_otro: form.horario_otro.value
+    };
     form.reset();
-    // Conserva los datos de quien responde (p. ej. hermanos en el mismo curso)
-    [['curso', curso], ['plantel', plantel], ['parentesco', par], ['acepta', acepta]].forEach(function (p) {
-      var el = form.querySelector('input[name="' + p[0] + '"][value="' + p[1] + '"]');
-      if (el) el.checked = true;
-    });
-    horarios.forEach(function (id) { document.getElementById(id).checked = true; });
-    form.grupo.value = grp; form.parentesco_otro.value = parOtro; form.responde.value = resp;
-    tel.value = telefono; form.horario_otro.value = horOtro;
+    marcar('curso', guardado.curso); marcar('plantel', guardado.plantel);
+    marcar('parentesco', guardado.parentesco); marcar('acepta', guardado.acepta);
+    pintarGrupos();
+    marcar('grupo_lista', guardado.grupo_lista);
+    actualizarGrupoLibre();
+    pintarHorarios();
+    form.querySelectorAll('input[name="horario"]').forEach(function (i) { i.checked = guardado.horarios.indexOf(i.value) >= 0; });
+    form.grupo.value = guardado.grupo; form.parentesco_otro.value = guardado.parentesco_otro;
+    form.responde.value = guardado.responde; tel.value = guardado.telefono; form.horario_otro.value = guardado.horario_otro;
     actualizarVisibles();
     boton.disabled = false; boton.textContent = 'Enviar respuesta';
     document.getElementById('gracias').classList.add('oculto');
