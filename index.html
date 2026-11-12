@@ -222,12 +222,13 @@
           <input type="radio" name="plantel" id="p-sancosme" value="San Cosme"><label for="p-sancosme">San Cosme</label>
         </div>
 
-        <label class="campo" id="lbl-grupo">Grupo</label>
+        <label class="campo" id="lbl-grupo">Grupo de WhatsApp</label>
+        <p class="ayuda" style="margin:0 0 10px">Es el nombre del grupo de WhatsApp en el que están con nosotros.</p>
         <p class="ayuda" id="grupo-espera">Primero elija el curso y el plantel.</p>
         <div class="opciones grupos oculto" role="radiogroup" aria-labelledby="lbl-grupo" data-grupo="grupo_lista" id="grupo-lista"></div>
         <div id="grupo-libre" class="oculto">
           <input type="text" id="grupo" name="grupo" autocomplete="off" maxlength="80" placeholder="Ej. UNAM Sabatino Hidalgo" aria-labelledby="lbl-grupo">
-          <p class="ayuda">Escriba el nombre del grupo de WhatsApp en el que está añadido el alumno.</p>
+          <p class="ayuda">Escriba el nombre del grupo de WhatsApp en el que están con nosotros, tal como aparece.</p>
         </div>
       </section>
 
@@ -512,7 +513,7 @@
     if (!valorRadio('curso')) err(grupo('curso'), 'Elija el curso.');
     if (!valorRadio('plantel')) err(grupo('plantel'), 'Elija el plantel.');
     if (valorRadio('curso') && valorRadio('plantel')) {
-      if (gruposActuales() && !valorRadio('grupo_lista')) err(grupoLista, 'Elija el grupo del alumno.');
+      if (gruposActuales() && !valorRadio('grupo_lista')) err(grupoLista, 'Elija el grupo de WhatsApp en el que están con nosotros.');
       else if (!valorGrupo()) err(form.grupo, 'Escriba el nombre del grupo de WhatsApp.');
     }
 
